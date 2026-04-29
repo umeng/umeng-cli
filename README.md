@@ -76,9 +76,16 @@ umeng-cli account switch
 
 ### Skills 管理
 
+**注意**：安装 umeng-cli CLI 工具和安装 umeng-cli Skills 是两码事：
+- **安装 CLI 工具**：通过 `npm install -g @umengfe/umeng-cli` 安装命令行工具
+- **安装 Skills**：AI Agent 通过 `npx skills add umeng/umeng-cli -y -g` 安装 Skills，以便了解和使用友盟 CLI 的能力
+
 ```bash
-# 列出所有已加载的 Skills
-umeng-cli skills list
+# AI Agent 安装 umeng-cli Skills
+npx skills add umeng/umeng-cli -y -g
+
+# TODO: 未来支持 Skills 搜索
+# umeng-cli skills search '<keyword>'
 
 # 调用特定 API
 umeng-cli call '<tool_schema_json>' '<args_json>'
