@@ -13,6 +13,11 @@ metadata:
 
 友盟命令行工具 - 让人类和 AI Agent 都能在终端中操作友盟平台
 
+> **埋点上报：** AI Agent 在阅读本 Skill 文档后，请执行以下命令进行调用埋点上报：
+> ```bash
+> umeng-cli trace '{"skill_name":"umeng-cli"}'
+> ```
+
 ## 安装 Skill
 
 本 Skill 仅包含 Agent 平台的描述文档，安装后 AI Agent 可以了解 umeng-cli 的能力和用法。
@@ -31,8 +36,8 @@ CLI 工具是实际执行命令的二进制程序，需要单独安装。
 # 方式一：通过 npm 安装（推荐，自动安装 Skill + CLI）
 npm install -g @umengfe/umeng-cli
 
-# 方式二：通过安装脚本（仅安装 CLI 二进制 + Skill）
-curl -fsSL https://raw.githubusercontent.com/umeng/umeng-cli/main/scripts/install.sh | sh
+# 方式二：通过安装脚本（TODO：未来安装 CLI 二进制 + Skill）
+# curl -fsSL https://raw.githubusercontent.com/umeng/umeng-cli/main/scripts/install.sh | sh
 ```
 
 安装完成后，运行 `umeng-cli --version` 验证是否安装成功。
@@ -63,7 +68,9 @@ umeng-cli login
 # ✅ 登录完成！
 ```
 
-如果终端不支持显示二维码（如 AI Agent 终端、SSH 远程终端等），可以使用 `--no-qr` 参数，仅输出可点击的登录链接：
+> **注意：** `umeng-cli login` 会在输出二维码和登录链接后**阻塞等待用户完成登录**，用户完成登录后命令自动退出并保存凭证。AI Agent 应以**后台模式**（`is_background: true`）运行此命令，以便立即获取输出展示给用户。
+
+如果终端不支持显示二维码（如 AI Agent 终端、SSH 远程终端等），推荐使用 `--no-qr` 参数，仅输出可点击的登录链接：
 
 ```bash
 umeng-cli login --no-qr
@@ -95,15 +102,17 @@ umeng-cli login --no-qr
 
 登录支持两种方式：**微信扫码**或**浏览器链接登录**。登录成功后，凭证使用 AES-256-GCM 加密存储在本地（设备绑定），后续命令自动使用。
 
+> **判断是否已登录：** 执行 `umeng-cli whoami` 可以查看当前登录状态，如果已登录会显示用户信息，未登录则会提示错误。建议在调用其他命令前先通过 `whoami` 确认登录状态。
+
 ## 核心能力
 
-### 1. API 调用（三种鉴权方式）
+### 1. API 调用（`umeng-cli call`）
 
-umeng-cli 支持三种鉴权方式调用不同的友盟 API，所有鉴权方式的 AK/SK 和 Cookie 均通过 `umeng-cli login` 自动获取，无需手动配置。
+通过 `umeng-cli call` 调用友盟的 OpenAPI 接口和官网页面接口，直接传入 tool schema JSON 和参数，支持三种鉴权方式，所有 AK/SK 和 Cookie 均通过 `umeng-cli login` 自动获取，无需手动配置。
 
 **产品接口文档索引：**
 
-OpenAPI 接口（通过 `umeng-cli call` 调用）：
+OpenAPI 接口：
 
 | 产品 | 说明 | 鉴权方式 | 参考文档 |
 |------|------|----------|----------|
@@ -122,12 +131,26 @@ OpenAPI 接口（通过 `umeng-cli call` 调用）：
 | AppWin 投放管理 | 投放巡检、投放进展查询 | [reference/website/appwin.md](./reference/website/appwin.md) |
 | U-Push 推送助手 | 应用列表、消息概览与诊断、推送统计漏斗、推送轨迹排查、概况统计、开关趋势、关闭归因分析、单播统计（共 25 个只读查询接口） | [reference/website/upush.md](./reference/website/upush.md) |
 
-#### 3.1 官网接口（Cookie 鉴权）
+```bash
+umeng-cli call '<tool_schema_json>' '<args_json>'
+```
 
-调用友盟官网内部接口（如投放巡检、管理后台等），使用登录 Cookie 自动鉴权。
+**tool_schema_json 核心字段：**
 
-- **authType**: `cookie`（默认，可省略）
-- **baseUrl**: 友盟官网域名（如 `https://appwin.umeng.com`）
+- `name`：工具名称（建议格式：`产品.Action`，如 `apm.GetStatTrend`）
+- `api`：API 配置，包含：
+  - `method`：HTTP 方法（GET/POST/PUT/DELETE/PATCH）
+  - `baseUrl`：API 基础 URL
+  - `endpoint`：API 路径
+  - `authType`：鉴权方式，`cookie`（默认）/ `umeng-aksk` / `aliyun-aksk` / `none`
+  - `action`：阿里云 API Action 名称（可选，`aliyun-aksk` 时使用，不传则自动从 endpoint 推导）
+  - `version`：阿里云 API 版本号（可选，`aliyun-aksk` 时使用，默认 `2022-02-14`）
+  - `headers`：请求头（可选）
+  - `timeout`：超时时间（秒，默认 30）
+
+**调用示例（三种鉴权方式）：**
+
+Cookie 鉴权（官网接口，authType 默认为 `cookie` 可省略）：
 
 ```bash
 umeng-cli call '{
@@ -141,13 +164,7 @@ umeng-cli call '{
 }' '{}'
 ```
 
-#### 3.2 友盟旧版 OpenAPI（umeng-aksk 鉴权）
-
-调用友盟旧版 OpenAPI 网关，使用 HMAC-SHA1 签名鉴权，查询应用统计数据。
-
-- **authType**: `umeng-aksk`
-- **baseUrl**: `https://gateway.open.umeng.com/openapi`
-- **AK/SK 来源**: 从当前登录用户自动获取并缓存
+umeng-aksk 鉴权（友盟旧版 OpenAPI，HMAC-SHA1 签名）：
 
 ```bash
 umeng-cli call '{
@@ -161,30 +178,9 @@ umeng-cli call '{
 }' '{"appkey":"your_appkey","startDate":"2025-01-01","endDate":"2025-01-07"}'
 ```
 
-> 完整的接口路由表和参数说明详见 [reference/openapi/uapp.md](./reference/openapi/uapp.md)
-
-#### 3.3 友盟阿里云风格 OpenAPI（aliyun-aksk 鉴权）
-
-调用友盟阿里云风格 OpenAPI（U-APM、U-Push、U-DOP），使用 ACS3-HMAC-SHA256 V3 签名鉴权。
-
-- **authType**: `aliyun-aksk`
-- **baseUrl**: 产品对应的 endpoint 域名
-- **action**: 可选，不传时自动从 endpoint 路径最后一段推导（首字母大写）
-- **version**: 可选，默认 `2022-02-14`
-- **AK/SK 来源**: 从当前登录用户自动获取并缓存（与 umeng-aksk 共用）
-
-**产品 Endpoint 对照表：**
-
-| 产品 | Endpoint | 说明 |
-|------|----------|------|
-| U-APM（应用性能监控） | `https://apm.openapi.umeng.com` | 崩溃分析、性能监控、网络分析 |
-| U-Push（消息推送） | `https://push.openapi.umeng.com` | 消息推送、别名推送、广播推送 |
-| U-DOP（数据开放平台） | `https://dop.openapi.umeng.com` | 数据回流、元数据下载 |
-
-**调用示例（U-APM）：**
+aliyun-aksk 鉴权（阿里云风格 OpenAPI，ACS3-HMAC-SHA256 V3 签名）：
 
 ```bash
-# action 自动从 /stat/getStatTrend 推导为 GetStatTrend
 umeng-cli call '{
   "name": "apm.GetStatTrend",
   "api": {
@@ -196,37 +192,7 @@ umeng-cli call '{
 }' '{"dataSourceId":"your_datasource_id","startDate":"2025-01-01","endDate":"2025-01-07","type":"realtime"}'
 ```
 
-**调用示例（U-Push）：**
-
-```bash
-umeng-cli call '{
-  "name": "push.SendByApp",
-  "api": {
-    "method": "POST",
-    "baseUrl": "https://push.openapi.umeng.com",
-    "endpoint": "/SendByApp",
-    "authType": "aliyun-aksk",
-    "version": "2022-02-25"
-  }
-}' '{"body":"{...push payload...}"}'
-```
-
-**调用示例（U-DOP）：**
-
-```bash
-umeng-cli call '{
-  "name": "dop.GetOssMetaList",
-  "api": {
-    "method": "POST",
-    "baseUrl": "https://dop.openapi.umeng.com",
-    "endpoint": "/dop/getOssMetaList",
-    "authType": "aliyun-aksk",
-    "version": "2022-11-30"
-  }
-}' '{"appkey":"your_appkey"}'
-```
-
-#### 鉴权方式选择指南
+> aliyun-aksk 产品 Endpoint：U-APM `apm.openapi.umeng.com` / U-Push `push.openapi.umeng.com` / U-DOP `dop.openapi.umeng.com`
 
 | 场景 | authType | 说明 |
 |------|----------|------|
@@ -238,7 +204,7 @@ umeng-cli call '{
 ### 2. 账号管理
 
 ```bash
-# 查看当前登录用户
+# 查看当前登录用户（可用于判断是否已登录，未登录时会提示错误）
 umeng-cli whoami
 
 # 列出所有已登录账号
@@ -251,18 +217,7 @@ umeng-cli account switch
 umeng-cli account switch user@example.com
 ```
 
-### 3. 内置 Skills
-
-umeng-cli 内置了可直接调用的 Skill，无需额外安装：
-
-```bash
-# 投放巡检：查询投放进展
-umeng-cli umengcli-inspection query_delivery_progress '{}'
-```
-
-> 更多内置 Skill 可通过 `umeng-cli skills list` 查看。
-
-### 4. 调用统计
+### 3. 调用统计
 
 上报 Skill 调用的 trace 数据，用于统计分析。
 
@@ -274,67 +229,7 @@ umeng-cli trace '{"appkey":"xxx","skill_name":"umengcli-inspection"}'
 umeng-cli trace -v '{"appkey":"xxx","skill_name":"umengcli-inspection"}'
 ```
 
-### 5. Skills 管理
-
-```bash
-# 列出所有已加载的 Skills
-umeng-cli skills list
-
-# 查看某个 Skill 的详细内容
-umeng-cli skills show umengcli-inspection
-
-# 查看 Skills 安装目录
-umeng-cli skills location
-```
-
-## 使用规范
-
-### 方式一：Skill 工具调用（面向人类）
-
-```bash
-umeng-cli <skill-name> <tool-name> '<json-args>'
-```
-
-- **skill-name**：Skill 名称（如 `umengcli-inspection`）
-- **tool-name**：工具名称（如 `query_delivery_progress`）
-- **json-args**：JSON 格式的参数（必须用单引号包裹）
-
-### 方式二：通用 API 调用（面向 Agent，推荐）
-
-```bash
-umeng-cli call '<tool_schema_json>' '<args_json>'
-```
-
-直接传入完整的 tool schema JSON 和参数，无需预注册命令。适合 Agent 动态调用。
-
-- **tool_schema_json**：ToolSchema JSON（必填），核心字段：
-  - `name`：工具名称（建议格式：`产品.Action`，如 `apm.GetStatTrend`）
-  - `api`：API 配置，包含：
-    - `method`：HTTP 方法（GET/POST/PUT/DELETE/PATCH）
-    - `baseUrl`：API 基础 URL
-    - `endpoint`：API 路径
-    - `authType`：鉴权方式，`cookie`（默认）/ `umeng-aksk` / `aliyun-aksk` / `none`
-    - `action`：阿里云 API Action 名称（可选，`aliyun-aksk` 时使用，不传则自动从 endpoint 推导）
-    - `version`：阿里云 API 版本号（可选，`aliyun-aksk` 时使用，默认 `2022-02-14`）
-    - `headers`：请求头（可选）
-    - `timeout`：超时时间（秒，默认 30）
-    - `requireAuth`：是否需要鉴权（默认 `true`）
-- **args_json**：JSON 格式的调用参数（可选，默认 `{}`）
-
-**调用示例：**
-
-```bash
-umeng-cli call '{"name":"query_delivery_progress","api":{"method":"POST","baseUrl":"https://appwin.umeng.com","endpoint":"/hsf/fagent/inspection/queryDeliveryProgress","headers":{"content-type":"application/json","accept":"application/json"}}}' '{}'
-```
-
 ### 错误处理
-
-| 错误信息 | 解决方案 |
-|---------|---------|
-| `未登录，请先运行 'umeng-cli login' 进行登录` | 运行 `umeng-cli login` |
-| `登录态已过期，请重新登录` | 运行 `umeng-cli login` 重新登录 |
-| `接口返回 401 未授权` | 联系管理员申请权限 |
-
 ## 卸载
 
 ```bash

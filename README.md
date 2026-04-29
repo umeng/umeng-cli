@@ -136,3 +136,4 @@ umeng-cli uninstall --keep-config
 ## 更多信息
 
 - GitHub: https://github.com/umeng/umeng-cli
+- [AI Agent Skills 文档](./umeng-cli/SKILL.md) - 了解 umeng-cli 的完整能力和用法
