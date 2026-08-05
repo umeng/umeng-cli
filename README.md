@@ -1,3 +1,17 @@
+# Umeng CLI
+
+Official command-line tools and AI-agent skills for Umeng+ analytics, performance monitoring, push notifications, mini-app analytics and OpenAPI services.
+
+友盟CLI支持开发者和AI Agent使用U-App、U-APM、U-Push、U-Mini、AppTrack和友盟OpenAPI。
+
+## Quick Links｜快速入口
+
+- [友盟+官网](https://www.umeng.com/)
+- [SDK开发者中心](https://devs.umeng.com/)
+- [提交问题](https://github.com/umeng/umeng-cli/issues)
+
+---
+
 # umeng-cli
 
 友盟命令行工具（Umeng Command Line Interface）- 支持通过多种鉴权方式调用友盟全线 API（官网接口/旧版 OpenAPI/阿里云风格 OpenAPI），涵盖移动统计、性能监控、消息推送、数据返还等功能。
