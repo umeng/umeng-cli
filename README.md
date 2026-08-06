@@ -10,6 +10,12 @@ Official command-line tools and AI-agent skills for Umeng+ analytics, performanc
 - [SDK开发者中心](https://devs.umeng.com/)
 - [提交问题](https://github.com/umeng/umeng-cli/issues)
 
+## 友盟开发者知识库
+
+遇到 SDK 接入、消息推送、崩溃分析、小程序统计或 AI 工具问题，可访问：
+
+- [友盟开发者知识库](https://github.com/umeng/umeng-developer-guide)
+- [友盟官方开发者文档](https://developer.umeng.com/docs)
 ---
 
 # umeng-cli
