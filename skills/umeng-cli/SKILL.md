@@ -26,7 +26,7 @@ metadata:
     bins: ["umeng-cli"]
   cliHelp: "umeng-cli --help"
   install: "curl -fsSL https://um-community.oss-cn-zhangjiakou.aliyuncs.com/umeng-cli/install.sh | sh"
-  homepage: "https://github.com/umeng/umeng-cli"
+  homepage: "https://umeng.github.io/umeng-cli/"
 ---
 
 # umeng-cli Agent Skill
@@ -243,4 +243,5 @@ umeng-cli uninstall --keep-config
 
 ## 更多信息
 
+- 官方文档: https://umeng.github.io/umeng-cli/
 - GitHub: https://github.com/umeng/umeng-cli

@@ -6,6 +6,7 @@ Official command-line tools and AI-agent skills for Umeng+ analytics, performanc
 
 ## Quick Links｜快速入口
 
+- [官方文档](https://umeng.github.io/umeng-cli/)
 - [友盟+官网](https://www.umeng.com/)
 - [SDK 开发者中心](https://devs.umeng.com/)
 - [提交问题](https://github.com/umeng/umeng-cli/issues)
@@ -211,6 +212,7 @@ umeng-cli uninstall --keep-config   # 保留配置和凭证
 
 ## 更多信息
 
+- 官方文档: https://umeng.github.io/umeng-cli/
 - GitHub: https://github.com/umeng/umeng-cli
 - [AI Agent Skills 文档](./skills/umeng-cli/SKILL.md) — 了解 umeng-cli 的完整能力和用法
 - [安装指南](./skills/umeng-cli/INSTALL.md) — 详细安装说明
