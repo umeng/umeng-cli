@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" fill="none">
+  <rect width="200" height="200" rx="40" fill="url(#umeng-gradient)"/>
+  <rect x="38" y="55" width="124" height="90" rx="14" fill="white" fill-opacity="0.12" stroke="white" stroke-width="4"/>
+  <path d="M62 85L76 99L62 113" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="84" y1="113" x2="122" y2="113" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="146" cy="73" r="5" fill="white"/>
+  <defs>
+    <linearGradient id="umeng-gradient" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5c73e7"/>
+      <stop offset="1" stop-color="#00c3ff"/>
+    </linearGradient>
+  </defs>
+</svg>

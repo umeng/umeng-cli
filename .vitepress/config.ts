@@ -8,8 +8,8 @@ export default defineConfig({
   base: '/umeng-cli/',
 
   head: [
-    ['meta', { name: 'theme-color', content: '#1a73e8' }],
-    ['link', { rel: 'icon', href: '/umeng-cli/favicon.ico' }],
+    ['meta', { name: 'theme-color', content: '#5c73e7' }],
+    ['link', { rel: 'icon', href: '/umeng-cli/logo.svg', type: 'image/svg+xml' }],
   ],
 
   themeConfig: {
@@ -73,7 +73,7 @@ export default defineConfig({
 
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright © 2025 Umeng+',
+      copyright: 'Copyright © 2011-present Umeng.com',
     },
 
     search: {

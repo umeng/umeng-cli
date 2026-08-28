@@ -5,6 +5,9 @@ hero:
   name: "Umeng CLI"
   text: "友盟命令行工具"
   tagline: 让人类和 AI Agent 都能在终端中操作友盟平台
+  image:
+    src: /logo.svg
+    alt: Umeng CLI
   actions:
     - theme: brand
       text: 快速开始
